@@ -1,0 +1,10 @@
+[package]
+name = "ender"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+avian3d = "0.3.1"
+bevy = "0.16.1"
+bevy_egui = "0.35.1"
+serde = { version = "1.0.219", features = ["derive"] }
