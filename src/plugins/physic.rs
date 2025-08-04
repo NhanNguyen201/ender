@@ -6,7 +6,7 @@ impl Plugin for PhysicPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_plugins(PhysicsPlugins::default().set(PhysicsInterpolationPlugin::interpolate_all()))
-
+            .insert_resource(Gravity::ZERO)
             .insert_gizmo_config(
                 PhysicsGizmos {
                     aabb_color: Some(Color::WHITE),
