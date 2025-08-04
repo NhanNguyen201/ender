@@ -1,5 +1,9 @@
-use bevy::{ecs::bundle, prelude::*};
+use bevy::prelude::*;
 use std::fmt;
+
+pub mod resource;
+pub use resource::*;
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Hash, States, Reflect)]
 pub enum GameState {
     #[default]
@@ -36,62 +40,6 @@ pub enum ShipType {
     AutoPilot
 }
 
-#[derive(Component, Debug, Clone, Copy)]
-pub struct Health {
-    pub max_hit_points: f32,
-    pub current_hit_points: f32,
-} 
-
-#[derive(Component, Debug, Clone, Copy)]
-pub struct Attack {
-    pub attack_power: f32,
-}
-
-
-#[derive(Bundle)]
-pub struct BattleBundle {
-    health: Health,
-    attack: Attack
-}
-
-pub trait BattleStatExt {
-    fn new(ship_type: ShipType) -> Self;
-}
-
-impl BattleStatExt for BattleBundle {
-    fn new(ship_type: ShipType) -> Self {
-        match ship_type {
-            ShipType::Mothership => BattleBundle {
-                health: Health {
-                    max_hit_points: 10000.0,
-                    current_hit_points: 10000.0
-                },
-                attack: Attack {
-                    attack_power: 2000.0
-                }
-            },
-            ShipType::Carrier => BattleBundle {
-                 health: Health {
-                    max_hit_points: 2000.0,
-                    current_hit_points: 2000.0
-                },
-                attack: Attack {
-                    attack_power: 200.0
-                }
-            },
-            ShipType::AutoPilot => BattleBundle {
-                 health: Health {
-                    max_hit_points: 200.0,
-                    current_hit_points: 200.0
-                },
-                attack: Attack {
-                    attack_power: 35.0
-                }
-            }
-        }
-    }
-    
-}
 
 impl fmt::Display for PlayerRoleHierachy {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

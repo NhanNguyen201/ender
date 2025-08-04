@@ -4,6 +4,8 @@ mod ui;
 mod gameplay;
 mod plugins;
 use plugins::*;
+mod unit;
+use unit::*;
 
 use crate::{gameplay::{GameState, PlayerRole}};
 
