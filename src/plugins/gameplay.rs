@@ -27,5 +27,5 @@ impl Plugin for GamePlayPlugin {
 }
 
 fn run_once(player_role: Res<PlayerRole>) {
-    println!("This run onee: {:#?}", player_role.role);
+    println!("You are play as {:#?}. Good luck, have fun", player_role.role);
 }
