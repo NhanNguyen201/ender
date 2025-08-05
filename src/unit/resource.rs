@@ -17,6 +17,7 @@ pub trait AimingExt {
 pub trait HealthExt {
     fn get_max_hit_points(&self) -> f32;
     fn get_current_hit_points(&self) -> f32;
+    fn take_damage(&mut self, damage: f32);
 }
 
 pub trait AttackExt {
@@ -27,8 +28,9 @@ pub trait BattleStatExt {
 }
 
 pub trait MobilityExt {
-    fn new(speed: f32, direction: Vec3) -> Self;
+    fn new(speed: f32, turn_speed: f32,  direction: Vec3) -> Self;
     fn get_speed(&self) -> f32;
+    fn get_turn_speed(&self) -> f32;
     fn get_direction(&self) -> Vec3;
     fn set_speed(&mut self, speed: f32);
     fn set_direction(&mut self, direction: Vec3);
