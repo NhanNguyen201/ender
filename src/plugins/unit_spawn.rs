@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 
-use crate::{gameplay::{ GameState, InGameSet, Races, ShipType}, plugins::AssetPack, unit::{Aiming, AimingExt, BattleBundle, BattleStatExt, Mobility, MobilityExt, Target}};
+use crate::{gameplay::{ GameState, InGameSet, Races, ShipType}, plugins::AssetPack, unit::{Aiming, AimingExt, Attack, AttackExt, BattleBundle, BattleStatExt, Health, HealthExt, Mobility, MobilityExt, Target}};
 
 use avian3d::prelude::*;
 pub struct UnitSpawnPlugin;
@@ -10,7 +10,8 @@ impl Plugin for UnitSpawnPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnExit(GameState::StartupScreen), spawn_unit)
-            .add_systems(FixedUpdate, (update_mobility_by_aiming ,update_position_by_mobility).chain().run_if(in_state(GameState::Playing)).in_set(InGameSet::EntityUpdates));
+            .add_systems(FixedUpdate, (update_mobility_by_aiming ,update_position_by_mobility).chain().run_if(in_state(GameState::Playing)).in_set(InGameSet::EntityUpdates))
+            .add_systems(PostUpdate, despawn_no_health_units.run_if(in_state(GameState::Playing)).in_set(InGameSet::DespawnEntites));
     }
 }
 
@@ -30,6 +31,7 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
             Races::Human,
             ShipType::Mothership,
             BattleBundle::new(ShipType::Mothership),
+            CollisionEventsEnabled
             
 
         ));
@@ -52,6 +54,7 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
             Races::Scourge,
             ShipType::Mothership,
             BattleBundle::new(ShipType::Mothership),
+            CollisionEventsEnabled
            
         ));
     };
@@ -74,8 +77,9 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
                 ColliderConstructor::TrimeshFromMesh,
                 RigidBody::Dynamic,
                 Mobility {speed: 0.15, ..default()},
+                CollisionEventsEnabled
 
-            ));
+            )).observe(|trigger: Trigger<OnCollisionStart>, mut health_query: Query<&mut Health>, attack_query: Query<&Attack>, ship_type_query: Query<&ShipType>, mut commands: Commands| collision_observer_handle(trigger, health_query, attack_query, ship_type_query, commands));;
         }
     };
 
@@ -97,10 +101,10 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
                 ColliderConstructor::TrimeshFromMesh,
                 RigidBody::Dynamic,
                 Mobility {speed: 0.15, ..default()},
-
+                CollisionEventsEnabled
                 
 
-            ));
+            )).observe(|trigger: Trigger<OnCollisionStart>, mut health_query: Query<&mut Health>, attack_query: Query<&Attack>, ship_type_query: Query<&ShipType>, mut commands: Commands| collision_observer_handle(trigger, health_query, attack_query, ship_type_query, commands));
         }
     }
 }
@@ -133,9 +137,57 @@ fn update_mobility_by_aiming(
 
 fn update_position_by_mobility(
     mut query: Query<(&mut Transform, &Mobility)>,
+    time: Res<Time>
 ) {
     for (mut transform, mobility) in query.iter_mut() {
         transform.translation += mobility.get_direction() * mobility.get_speed();
-        transform.rotation = Quat::from_rotation_arc(Vec3::Z, mobility.get_direction().normalize_or_zero());
+        let mobility_direction_to_quat = Quat::from_rotation_arc(Vec3::Z, mobility.get_direction().normalize_or_zero());
+        if mobility_direction_to_quat != transform.rotation {
+            transform.rotation = Quat::from_rotation_arc(Vec3::Z, mobility.get_direction().normalize_or_zero());
+            let current_rotation = transform.rotation;
+            let angle = current_rotation.angle_between(mobility_direction_to_quat);
+            let max_step = mobility.get_turn_speed() as f32 * time.delta_secs();
+            let t = (max_step / angle).min(1.0);
+            transform.rotation = current_rotation.slerp(mobility_direction_to_quat, t);
+        }
+    }
+}
+
+fn despawn_no_health_units(
+    mut commands: Commands,
+    query: Query<(Entity, &Health), With<ShipType>>,
+) {
+    for (entity, health) in query.iter() {
+        if health.get_current_hit_points() <= 0.0 {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+fn collision_observer_handle(trigger: Trigger<OnCollisionStart>, 
+    mut health_query: Query<&mut Health>,
+    attack_query: Query<&Attack>,
+    ship_type_query: Query<&ShipType>,
+    mut commands: Commands
+) {
+    let ship_ent = trigger.target();
+    let other_entity = trigger.collider;
+
+    let ship_type = ship_type_query.get(ship_ent);
+    let other_ship_type = ship_type_query.get(other_entity);
+
+    match (ship_type, other_ship_type) {
+        (Ok(st1), Ok(st2)) => {
+            if st1 == st2 {
+                // Same type, despawn
+                commands.entity(ship_ent).despawn();
+            } else {
+                // Different type, apply damage
+                 if let (Ok(mut health), Ok(attack)) = (health_query.get_mut(ship_ent), attack_query.get(other_entity)) {
+                    health.take_damage(attack.get_attack_power());
+                }
+            }
+        }
+        _ => {}
     }
 }
