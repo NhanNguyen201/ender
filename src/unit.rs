@@ -110,3 +110,38 @@ impl BattleStatExt for BattleBundle {
     }
     
 }
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct Aiming {
+    pub target: Option<Target>
+}
+
+impl Default for Aiming {
+    fn default() -> Self {
+        Aiming {
+            target: None
+        }
+    }   
+}
+
+impl AimingExt for Aiming {
+
+    fn new(target: Target) -> Self {
+        Self {
+            target: Some(target)
+        }
+    }
+
+    fn get_target(&self) -> Option<Target> {
+        match self.target {
+            Some(ref target) => Some(target.clone()),
+            None => None,
+            
+        }
+    }
+
+    fn set_target(&mut self, target: Target) {
+        self.target = Some(target);
+    }
+}
+

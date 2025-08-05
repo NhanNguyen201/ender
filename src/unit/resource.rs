@@ -2,6 +2,18 @@ use bevy::prelude::*;
 
 use crate::gameplay::ShipType;
 
+#[derive( Debug, Clone, Copy)]
+pub enum Target {
+    Entity(Entity),
+    Position(Vec3),
+}
+
+pub trait AimingExt {
+    fn new(target: Target) -> Self;
+    fn get_target(&self) -> Option<Target>;
+    fn set_target(&mut self, target: Target);
+}
+
 pub trait HealthExt {
     fn get_max_hit_points(&self) -> f32;
     fn get_current_hit_points(&self) -> f32;

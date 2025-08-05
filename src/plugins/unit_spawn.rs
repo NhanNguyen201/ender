@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 
-use crate::{gameplay::{ GameState, InGameSet, Races, ShipType}, plugins::AssetPack, unit::{BattleBundle, BattleStatExt, Mobility, MobilityExt}};
+use crate::{gameplay::{ GameState, InGameSet, Races, ShipType}, plugins::AssetPack, unit::{Aiming, AimingExt, BattleBundle, BattleStatExt, Mobility, MobilityExt, Target}};
 
 use avian3d::prelude::*;
 pub struct UnitSpawnPlugin;
@@ -10,7 +10,7 @@ impl Plugin for UnitSpawnPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnExit(GameState::StartupScreen), spawn_unit)
-            .add_systems(Update, update_position_by_mobility.run_if(in_state(GameState::Playing)).in_set(InGameSet::EntityUpdates));
+            .add_systems(FixedUpdate, (update_mobility_by_aiming ,update_position_by_mobility).chain().run_if(in_state(GameState::Playing)).in_set(InGameSet::EntityUpdates));
     }
 }
 
@@ -30,7 +30,7 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
             Races::Human,
             ShipType::Mothership,
             BattleBundle::new(ShipType::Mothership),
-            Mobility::new(0.0, Vec3::ZERO),
+            
 
         ));
     };
@@ -52,8 +52,7 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
             Races::Scourge,
             ShipType::Mothership,
             BattleBundle::new(ShipType::Mothership),
-            Mobility::new(0.0, Vec3::ZERO),
-
+           
         ));
     };
 
@@ -74,7 +73,8 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
                 BattleBundle::new(ShipType::Carrier),
                 ColliderConstructor::TrimeshFromMesh,
                 RigidBody::Dynamic,
-                Mobility::new(0.5, Vec3 { x: 0.0, y: 0.0, z: 1.0 }),
+                Mobility {speed: 0.15, ..default()},
+
             ));
         }
     };
@@ -96,10 +96,38 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
                 BattleBundle::new(ShipType::Carrier),
                 ColliderConstructor::TrimeshFromMesh,
                 RigidBody::Dynamic,
-                Mobility::new(0.5, Vec3 { x: 0.0, y: 0.0, z: 1.0 }),
+                Mobility {speed: 0.15, ..default()},
+
+                
 
             ));
         }
+    }
+}
+
+fn update_mobility_by_aiming(
+    mut query: Query<(&mut Mobility, &Aiming, &Transform)>,
+    target_transforms: Query<&Transform>,
+
+) {
+    for (mut mobility, aiming, transform) in query.iter_mut() {
+        // let direction = aiming.get_direction();
+        let target = aiming.get_target();
+        let direction = match target {
+            Some(Target::Entity(entity)) => {
+                if let Ok(target_transform) = target_transforms.get(entity) {
+                    (target_transform.translation - transform.translation).normalize_or_zero()
+                } else {
+                    Vec3::ZERO
+                }
+            },
+            Some(Target::Position(position)) => {
+                (position - transform.translation).normalize_or_zero()
+            },
+            None => Vec3::ZERO,
+        };
+        mobility.set_direction(direction);
+        // mobility.set_speed(aiming.get_speed());
     }
 }
 
@@ -108,5 +136,6 @@ fn update_position_by_mobility(
 ) {
     for (mut transform, mobility) in query.iter_mut() {
         transform.translation += mobility.get_direction() * mobility.get_speed();
+        transform.rotation = Quat::from_rotation_arc(Vec3::Z, mobility.get_direction().normalize_or_zero());
     }
 }
