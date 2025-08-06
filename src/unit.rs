@@ -106,7 +106,7 @@ impl BattleStatExt for BattleBundle {
                     current_hit_points: 2000.0
                 },
                 attack: Attack {
-                    attack_power: 200.0
+                    attack_power: 2000.0
                 }
             },
             ShipType::AutoPilot => BattleBundle {
@@ -115,7 +115,7 @@ impl BattleStatExt for BattleBundle {
                     current_hit_points: 200.0
                 },
                 attack: Attack {
-                    attack_power: 25.0
+                    attack_power: 200.0
                 }
             }
         }
