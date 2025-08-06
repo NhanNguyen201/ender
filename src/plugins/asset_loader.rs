@@ -40,19 +40,19 @@ fn load_asset(
 
      // Human ships
     insert_asset(&mut asset_pack, &asset_server, "human_mother_ship",
-        "models/HumanMothership.glb#Mesh0/Primitive0", "models/HumanMothership.glb#Scene0");
+        "models/HumanMothership_mesh.glb#Mesh0/Primitive0", "models/HumanMothership.glb#Scene0");
     insert_asset(&mut asset_pack, &asset_server, "human_carrier",
-        "models/HumanCarrier.glb#Mesh0/Primitive0", "models/HumanCarrier.glb#Scene0");
+        "models/HumanCarrier_mesh.glb#Mesh0/Primitive0", "models/HumanCarrier.glb#Scene0");
     insert_asset(&mut asset_pack, &asset_server, "human_auto_pilot",
-        "models/HumanAutoPilot.glb#Mesh0/Primitive0", "models/HumanAutoPilot.glb#Scene0");
+        "models/HumanAutoPilot_mesh.glb#Mesh0/Primitive0", "models/HumanAutoPilot.glb#Scene0");
 
     // Alien ships
     insert_asset(&mut asset_pack, &asset_server, "alien_mother_ship",
-        "models/AlienMothership.glb#Mesh0/Primitive0", "models/AlienMothership.glb#Scene0");
+        "models/AlienMothership_mesh.glb#Mesh0/Primitive0", "models/AlienMothership.glb#Scene0");
     insert_asset(&mut asset_pack, &asset_server, "alien_carrier",
-        "models/AlienCarrier.glb#Mesh0/Primitive0", "models/AlienCarrier.glb#Scene0");
+        "models/AlienCarrier_mesh.glb#Mesh0/Primitive0", "models/AlienCarrier.glb#Scene0");
     insert_asset(&mut asset_pack, &asset_server, "alien_auto_pilot",
-        "models/AlienAutoPilot.glb#Mesh0/Primitive0", "models/AlienAutoPilot.glb#Scene0");
+        "models/AlienAutoPilot_mesh.glb#Mesh0/Primitive0", "models/AlienAutoPilot.glb#Scene0");
    
 
 
