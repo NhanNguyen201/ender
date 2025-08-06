@@ -5,7 +5,7 @@ use bevy::input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll};
 use bevy_egui::EguiStartupSet;
 use std::{f32::consts::FRAC_PI_2, ops::Range};
 
-use crate::gameplay::GameState;
+use crate::gameplay::{GameState, InGameSet};
 // Define a struct for the plugin.
 #[derive(Debug, Resource)]
 pub struct OrbitCameraSettings {
@@ -45,7 +45,7 @@ impl Plugin for OrbitCameraPlugin {
              .insert_resource(DirectionalLightShadowMap { size: 4096 })
             .add_systems(PreStartup, spawn_camera.before(EguiStartupSet::InitContexts))
             .add_systems(OnExit(GameState::StartupScreen), spawn_lighs)
-            .add_systems(Update, orbit_control.run_if(in_state(GameState::Playing)));
+            .add_systems(Update, orbit_control.run_if(in_state(GameState::Playing)).in_set(InGameSet::UserInput));
           
     }
 }
