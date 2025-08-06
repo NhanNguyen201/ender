@@ -19,6 +19,18 @@ impl Plugin for AssetLoaderPlugin {
             .add_systems(Startup, load_asset);
     }
 }
+fn insert_asset(
+    asset_pack: &mut AssetPack,
+    asset_server: &AssetServer,
+    key: &str,
+    mesh_path: &str,
+    scene_path: &str,
+) {
+    let mesh: Handle<Mesh> = asset_server.load(mesh_path);
+    let scene: Handle<Scene> = asset_server.load(scene_path);
+    asset_pack.mesh_store.insert(key.to_string(), mesh);
+    asset_pack.scene_store.insert(key.to_string(), scene);
+}
 
 fn load_asset(
     asset_server: Res<AssetServer>,
@@ -26,37 +38,21 @@ fn load_asset(
 ) {
     let _loaded_folder: Handle<LoadedFolder>= asset_server.load_folder("models");
 
-    let human_mother_ship_mesh: Handle<Mesh> = asset_server.load( "models/HumanMothership.glb#Mesh0/Primitive0");
-    let human_mother_ship_scene: Handle<Scene> = asset_server.load("models/HumanMothership.glb#Scene0");
-    println!("Loaded human_mother_ship: {:?}", human_mother_ship_mesh);
-    asset_pack.scene_store.insert("human_mother_ship".to_string(), human_mother_ship_scene);
-    asset_pack.mesh_store.insert("human_mother_ship".to_string(), human_mother_ship_mesh);
+     // Human ships
+    insert_asset(&mut asset_pack, &asset_server, "human_mother_ship",
+        "models/HumanMothership.glb#Mesh0/Primitive0", "models/HumanMothership.glb#Scene0");
+    insert_asset(&mut asset_pack, &asset_server, "human_carrier",
+        "models/HumanCarrier.glb#Mesh0/Primitive0", "models/HumanCarrier.glb#Scene0");
+    insert_asset(&mut asset_pack, &asset_server, "human_auto_pilot",
+        "models/HumanAutoPilot.glb#Mesh0/Primitive0", "models/HumanAutoPilot.glb#Scene0");
 
-    let human_carrier_mesh: Handle<Mesh> = asset_server.load( "models/HumanCarrier.glb#Mesh0/Primitive0");
-    let human_carrier_scene: Handle<Scene> = asset_server.load( "models/HumanCarrier.glb#Scene0");
-    asset_pack.mesh_store.insert("human_carrier".to_string(), human_carrier_mesh);
-    asset_pack.scene_store.insert("human_carrier".to_string(), human_carrier_scene);
-
-    let human_auto_pilot_mesh: Handle<Mesh> = asset_server.load( "models/HumanAutoPilot.glb#Mesh0/Primitive0");
-    let human_auto_pilot_scene: Handle<Scene> = asset_server.load( "models/HumanAutoPilot.glb#Scene0");
-    asset_pack.mesh_store.insert("human_auto_pilot".to_string(), human_auto_pilot_mesh);
-    asset_pack.scene_store.insert("human_auto_pilot".to_string(), human_auto_pilot_scene);
-
-
-     let alien_mother_ship_mesh: Handle<Mesh> = asset_server.load( "models/AlienMothership.glb#Mesh0/Primitive0");
-     let alien_mother_ship_scene: Handle<Scene> = asset_server.load( "models/AlienMothership.glb#Scene0");
-    asset_pack.mesh_store.insert("alien_mother_ship".to_string(), alien_mother_ship_mesh);
-    asset_pack.scene_store.insert("alien_mother_ship".to_string(), alien_mother_ship_scene);
-
-    let alien_carrier_mesh: Handle<Mesh> = asset_server.load( "models/AlienCarrier.glb#Mesh0/Primitive0");
-    let alien_carrier_scene: Handle<Scene> = asset_server.load( "models/AlienCarrier.glb#Scene0");
-    asset_pack.mesh_store.insert("alien_carrier".to_string(), alien_carrier_mesh);
-    asset_pack.scene_store.insert("alien_carrier".to_string(), alien_carrier_scene);
-
-    let alien_auto_pilot_mesh: Handle<Mesh> = asset_server.load( "models/AlienAutoPilot.glb#Mesh0/Primitive0");
-    let alien_auto_pilot_scene: Handle<Scene> = asset_server.load( "models/AlienAutoPilot.glb#Scene0");
-    asset_pack.mesh_store.insert("alien_auto_pilot".to_string(), alien_auto_pilot_mesh);
-    asset_pack.scene_store.insert("alien_auto_pilot".to_string(), alien_auto_pilot_scene);
+    // Alien ships
+    insert_asset(&mut asset_pack, &asset_server, "alien_mother_ship",
+        "models/AlienMothership.glb#Mesh0/Primitive0", "models/AlienMothership.glb#Scene0");
+    insert_asset(&mut asset_pack, &asset_server, "alien_carrier",
+        "models/AlienCarrier.glb#Mesh0/Primitive0", "models/AlienCarrier.glb#Scene0");
+    insert_asset(&mut asset_pack, &asset_server, "alien_auto_pilot",
+        "models/AlienAutoPilot.glb#Mesh0/Primitive0", "models/AlienAutoPilot.glb#Scene0");
    
 
 
