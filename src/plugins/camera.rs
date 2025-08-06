@@ -63,40 +63,40 @@ fn spawn_camera(mut commands: Commands) {
 
 fn spawn_lighs(mut commands: Commands) {
     commands.insert_resource(AmbientLight {
-        color: Color::linear_rgb(1., 1., 1.),
-        brightness: 1000.0,
+        color: Color::linear_rgb(0.8, 0.8, 0.8),
+        brightness: 5000.0,
         ..default()
     });
-    commands.spawn((
-       SpotLight {
-            intensity: 10000.0,
-            ..default()
-       },
-       Transform {
-            translation: Vec3 { x: 20., y: 20., z: 10. },
-            ..default()
-       }
-    ));
-    commands.spawn((
-       SpotLight {
-            intensity: 10000.0,
-            ..default()
-       },
-       Transform {
-            translation: Vec3 { x: -20., y: 20., z: -10. },
-            ..default()
-       }
-    ));
-    commands.spawn((
-       SpotLight {
-            intensity: 5_000.0,
-            ..default()
-       },
-       Transform {
-            translation: Vec3 { x: 0., y: 10., z: 10. },
-            ..default()
-       }
-    ));
+    // commands.spawn((
+    //    SpotLight {
+    //         intensity: 10000.0,
+    //         ..default()
+    //    },
+    //    Transform {
+    //         translation: Vec3 { x: 20., y: 20., z: 10. },
+    //         ..default()
+    //    }
+    // ));
+    // commands.spawn((
+    //    SpotLight {
+    //         intensity: 10000.0,
+    //         ..default()
+    //    },
+    //    Transform {
+    //         translation: Vec3 { x: -20., y: 20., z: -10. },
+    //         ..default()
+    //    }
+    // ));
+    // commands.spawn((
+    //    SpotLight {
+    //         intensity: 5_000.0,
+    //         ..default()
+    //    },
+    //    Transform {
+    //         translation: Vec3 { x: 0., y: 10., z: 10. },
+    //         ..default()
+    //    }
+    // ));
     commands.spawn((
         DirectionalLight {
             shadows_enabled: true,
