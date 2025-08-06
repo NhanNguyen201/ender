@@ -2,24 +2,29 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 
-use crate::{gameplay::{ GameState, InGameSet, Races, ShipType}, plugins::AssetPack, unit::{Aiming, AimingExt, Attack, AttackExt, BattleBundle, BattleStatExt, Health, HealthExt, Mobility, MobilityExt, Target}};
+use crate::{
+    gameplay::{ GameState, InGameSet, Races, ShipType}, 
+    plugins::AssetPack, 
+    unit::{Aiming, AimingExt, Attack, AttackExt, BattleBundle, BattleStatExt, Health, HealthExt, Mobility, MobilityExt, Target}};
 
 use avian3d::prelude::*;
 pub struct UnitSpawnPlugin;
 impl Plugin for UnitSpawnPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnExit(GameState::StartupScreen), spawn_unit)
+            .add_systems(OnExit(GameState::StartupScreen), (spawn_unit, spawn_auto_pilot))
             .add_systems(FixedUpdate, (update_mobility_by_aiming ,update_position_by_mobility).chain().run_if(in_state(GameState::Playing)).in_set(InGameSet::EntityUpdates))
-            .add_systems(PostUpdate, despawn_no_health_units.run_if(in_state(GameState::Playing)).in_set(InGameSet::DespawnEntites));
+            .add_systems(Update, despawn_no_health_units.run_if(in_state(GameState::Playing)).in_set(InGameSet::DespawnEntites))
+            .add_observer(collision_observer_handle);
     }
 }
 
 fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
     if let Some(human_mother_ship_model) = asset_pack.scene_store.get("human_mother_ship") {
+        let mesh_component = Mesh3d(asset_pack.mesh_store.get("human_mother_ship").cloned().unwrap());
         command.spawn((
             SceneRoot(human_mother_ship_model.clone()),
-            Mesh3d(asset_pack.mesh_store.get("human_mother_ship").cloned().unwrap_or_default()),
+            mesh_component,
             Transform {
                 translation: Vec3 { x: 0.0, y: 0.0, z: -30.0},
                 rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
@@ -39,9 +44,10 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
 
 
     if let Some(alien_mother_ship_model) = asset_pack.scene_store.get("alien_mother_ship") {
+        let mesh_component = Mesh3d(asset_pack.mesh_store.get("alien_mother_ship").cloned().unwrap());
         command.spawn((
             SceneRoot(alien_mother_ship_model.clone()),
-            Mesh3d(asset_pack.mesh_store.get("alien_mother_ship").cloned().unwrap_or_default()),
+            mesh_component,
 
             Transform {
                 translation: Vec3 { x: 0.0, y: 0.0, z: 30.0},
@@ -60,7 +66,7 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
     };
 
     if let Some(human_carrier_model) = asset_pack.scene_store.get("human_carrier") {
-        let mesh_component = Mesh3d(asset_pack.mesh_store.get("human_carrier").cloned().unwrap_or_default());
+        let mesh_component = Mesh3d(asset_pack.mesh_store.get("human_carrier").cloned().unwrap());
         for n in 0..4 {
             command.spawn((
                 SceneRoot(human_carrier_model.clone()),
@@ -79,12 +85,12 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
                 Mobility {speed: 0.15, ..default()},
                 CollisionEventsEnabled
 
-            )).observe(|trigger: Trigger<OnCollisionStart>, mut health_query: Query<&mut Health>, attack_query: Query<&Attack>, ship_type_query: Query<&ShipType>, mut commands: Commands| collision_observer_handle(trigger, health_query, attack_query, ship_type_query, commands));;
+            ));
         }
     };
 
     if let Some(alien_carrier_model) = asset_pack.scene_store.get("alien_carrier") {
-        let mesh_component = Mesh3d(asset_pack.mesh_store.get("alien_carrier").cloned().unwrap_or_default());
+        let mesh_component = Mesh3d(asset_pack.mesh_store.get("alien_carrier").cloned().unwrap());
         for n in 0..4 {
             command.spawn((
                 SceneRoot(alien_carrier_model.clone()),
@@ -104,8 +110,53 @@ fn spawn_unit(mut command: Commands, asset_pack: Res<AssetPack>) {
                 CollisionEventsEnabled
                 
 
-            )).observe(|trigger: Trigger<OnCollisionStart>, mut health_query: Query<&mut Health>, attack_query: Query<&Attack>, ship_type_query: Query<&ShipType>, mut commands: Commands| collision_observer_handle(trigger, health_query, attack_query, ship_type_query, commands));
+            ));
         }
+    }
+}
+
+fn spawn_auto_pilot(mut command: Commands, asset_pack: Res<AssetPack>) {
+    if let Some(human_auto_pilot_model) = asset_pack.scene_store.get("human_auto_pilot") {
+        let mesh_compoent = Mesh3d(asset_pack.mesh_store.get("human_auto_pilot").cloned().unwrap());
+        command.spawn((
+            SceneRoot(human_auto_pilot_model.clone()),
+            mesh_compoent,
+            Transform {
+                translation: Vec3 { x: 0.0, y: 0.0, z: -20.0},
+                rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
+                ..default()
+            },
+            Name::new("Human_Auto_Pilot".to_string()),
+            Races::Human,
+            ShipType::AutoPilot,
+            BattleBundle::new(ShipType::AutoPilot),
+            Mobility {speed: 0.15, ..default()},
+            Aiming::new(Target::Position(Vec3::new(0., 10., 0.))),
+            ColliderConstructor::TrimeshFromMesh,
+            CollisionEventsEnabled
+
+        )).observe(collision_observer_handle);
+    };
+
+    if let Some(alien_auto_pilot_model) = asset_pack.scene_store.get("alien_auto_pilot") {
+        let mesh_coponent = Mesh3d(asset_pack.mesh_store.get("alien_auto_pilot").cloned().unwrap());
+        command.spawn((
+            SceneRoot(alien_auto_pilot_model.clone()),
+            mesh_coponent,
+            Transform {
+                translation: Vec3 { x: 0.0, y: 0.0, z: 20.0},
+                rotation: Quat::from_euler(EulerRot::XYZ, 0., PI, 0.),
+                ..default()
+            },
+            Name::new("Alien_Auto_Pilot".to_string()),
+            Races::Scourge,
+            ShipType::AutoPilot,
+            BattleBundle::new(ShipType::AutoPilot),
+            Mobility {speed: 0.15, ..default()},
+            Aiming::new(Target::Position(Vec3::new(0., 10., 0.))),
+            ColliderConstructor::TrimeshFromMesh,
+            CollisionEventsEnabled
+        )).observe(collision_observer_handle);
     }
 }
 
@@ -146,7 +197,7 @@ fn update_position_by_mobility(
             transform.rotation = Quat::from_rotation_arc(Vec3::Z, mobility.get_direction().normalize_or_zero());
             let current_rotation = transform.rotation;
             let angle = current_rotation.angle_between(mobility_direction_to_quat);
-            let max_step = mobility.get_turn_speed() as f32 * time.delta_secs();
+            let max_step = mobility.get_turn_speed() * time.delta_secs();
             let t = (max_step / angle).min(1.0);
             transform.rotation = current_rotation.slerp(mobility_direction_to_quat, t);
         }
@@ -155,7 +206,7 @@ fn update_position_by_mobility(
 
 fn despawn_no_health_units(
     mut commands: Commands,
-    query: Query<(Entity, &Health), With<ShipType>>,
+    query: Query<(Entity, &Health)>,
 ) {
     for (entity, health) in query.iter() {
         if health.get_current_hit_points() <= 0.0 {
@@ -164,30 +215,18 @@ fn despawn_no_health_units(
     }
 }
 
-fn collision_observer_handle(trigger: Trigger<OnCollisionStart>, 
+fn collision_observer_handle(
+    trigger: Trigger<OnCollisionStart>,
     mut health_query: Query<&mut Health>,
     attack_query: Query<&Attack>,
-    ship_type_query: Query<&ShipType>,
-    mut commands: Commands
 ) {
-    let ship_ent = trigger.target();
+    let first_ent = trigger.target();
     let other_entity = trigger.collider;
 
-    let ship_type = ship_type_query.get(ship_ent);
-    let other_ship_type = ship_type_query.get(other_entity);
-
-    match (ship_type, other_ship_type) {
-        (Ok(st1), Ok(st2)) => {
-            if st1 == st2 {
-                // Same type, despawn
-                commands.entity(ship_ent).despawn();
-            } else {
-                // Different type, apply damage
-                 if let (Ok(mut health), Ok(attack)) = (health_query.get_mut(ship_ent), attack_query.get(other_entity)) {
-                    health.take_damage(attack.get_attack_power());
-                }
-            }
-        }
-        _ => {}
+    if let (Ok(mut first_health), Ok(other_attack)) = (health_query.get_mut(first_ent), attack_query.get(other_entity)) {
+        first_health.take_damage(other_attack.get_attack_power());
     }
+    // if let (Ok(mut other_health), Ok(first_attack)) = (health_query.get_mut(other_entity), attack_query.get(first_ent)) {
+    //     other_health.take_damage(first_attack.get_attack_power());
+    // }
 }
