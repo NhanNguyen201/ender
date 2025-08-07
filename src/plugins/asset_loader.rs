@@ -16,7 +16,7 @@ impl Plugin for AssetLoaderPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<AssetPack>()
-            .add_systems(Startup, load_asset);
+            .add_systems(PreStartup, load_asset);
     }
 }
 fn insert_asset(
