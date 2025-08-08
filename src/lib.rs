@@ -1,11 +1,12 @@
 use bevy::{asset::AssetMetaCheck, prelude::*, window::WindowMode};
-
+use bevy::render::pipelined_rendering::PipelinedRenderingPlugin;
 mod ui;
 mod gameplay;
 mod plugins;
 use plugins::*;
+
 mod unit;
-use unit::*;
+
 
 use crate::{gameplay::{GameState, PlayerRole}};
 
@@ -29,7 +30,8 @@ impl Plugin for AppPlugin {
                     }
                     .into(),
                     ..default()
-                }),
+                })
+                .disable::<PipelinedRenderingPlugin>(),
         )
         .add_plugins(PhysicPlugin)
         .init_state::<GameState>()

@@ -6,7 +6,7 @@ use bevy::{asset::LoadedFolder, prelude::*};
 #[derive(Resource, Default)]
 pub struct AssetPack {
     pub mesh_store: HashMap<String, Handle<Mesh>>,
-    pub scene_store: HashMap<String, Handle<Scene>>,
+    // pub scene_store: HashMap<String, Handle<Scene>>,
     // pub collision_shapes: HashMap<String, Handle<CollisionShape>>,
 }
 
@@ -24,12 +24,11 @@ fn insert_asset(
     asset_server: &AssetServer,
     key: &str,
     mesh_path: &str,
-    scene_path: &str,
 ) {
     let mesh: Handle<Mesh> = asset_server.load(mesh_path);
-    let scene: Handle<Scene> = asset_server.load(scene_path);
+    // let scene: Handle<Scene> = asset_server.load(scene_path);
     asset_pack.mesh_store.insert(key.to_string(), mesh);
-    asset_pack.scene_store.insert(key.to_string(), scene);
+    // asset_pack.scene_store.insert(key.to_string(), scene);
 }
 
 fn load_asset(
@@ -40,19 +39,19 @@ fn load_asset(
 
      // Human ships
     insert_asset(&mut asset_pack, &asset_server, "human_mother_ship",
-        "models/Human_mothership_mesh.glb#Mesh0/Primitive0", "models/Human_mothership.glb#Scene0");
+        "models/Human_mothership_mesh.glb#Mesh0/Primitive0");
     insert_asset(&mut asset_pack, &asset_server, "human_carrier",
-        "models/Human_carrier_mesh.glb#Mesh0/Primitive0", "models/Human_carrier.glb#Scene0");
+        "models/Human_carrier_mesh.glb#Mesh0/Primitive0");
     insert_asset(&mut asset_pack, &asset_server, "human_auto_pilot",
-        "models/Human_autopilot_mesh.glb#Mesh0/Primitive0", "models/Human_autopilot.glb#Scene0");
+        "models/Human_autopilot_mesh.glb#Mesh0/Primitive0");
 
     // Alien ships
     insert_asset(&mut asset_pack, &asset_server, "alien_mother_ship",
-        "models/Alien_mothership_mesh.glb#Mesh0/Primitive0", "models/Alien_mothership.glb#Scene0");
+        "models/Alien_mothership_mesh.glb#Mesh0/Primitive0");
     insert_asset(&mut asset_pack, &asset_server, "alien_carrier",
-        "models/Alien_carrier_mesh.glb#Mesh0/Primitive0", "models/Alien_carrier.glb#Scene0");
+        "models/Alien_carrier_mesh.glb#Mesh0/Primitive0");
     insert_asset(&mut asset_pack, &asset_server, "alien_auto_pilot",
-        "models/Alien_autopilot_mesh.glb#Mesh0/Primitive0", "models/Alien_autopilot.glb#Scene0");
+        "models/Alien_autopilot_mesh.glb#Mesh0/Primitive0");
    
 
 

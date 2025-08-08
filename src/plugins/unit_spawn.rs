@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use bevy::prelude::*;
+use bevy::{color::palettes::css::{BLUE, RED}, prelude::*};
 
 use crate::{
     gameplay::{ GameState, InGameSet, Races, ShipType}, 
@@ -14,21 +14,26 @@ impl Plugin for UnitSpawnPlugin {
         app
             .add_systems(OnExit(GameState::StartupScreen), (spawn_human_mothership, spawn_alien_mothership, spawn_human_carrier, spawn_alien_carrier, spawn_auto_pilot).chain())
             .add_systems(FixedUpdate, (update_mobility_by_aiming ,update_position_by_mobility).chain().run_if(in_state(GameState::Playing)).in_set(InGameSet::EntityUpdates))
-            .add_systems(Update, despawn_no_health_units.run_if(in_state(GameState::Playing)).in_set(InGameSet::DespawnEntites))
-            .add_observer(collision_observer_handle);
+            .add_systems(Update, despawn_no_health_units.run_if(in_state(GameState::Playing)).in_set(InGameSet::DespawnEntites));
     }
 }
 
 
 fn spawn_human_mothership( 
     mut command: Commands,
-    asset_pack: Res<AssetPack>
+    asset_pack: Res<AssetPack>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+
 ){
-      if let Some(human_mother_ship_model) = asset_pack.scene_store.get("human_mother_ship") {
-        let mesh_component = Mesh3d(asset_pack.mesh_store.get("human_mother_ship").cloned().unwrap());
+        let hm_mesh_component = Mesh3d(asset_pack.mesh_store.get("human_mother_ship").cloned().unwrap());
+        let hm_mat_component =  MeshMaterial3d(materials.add(StandardMaterial {
+                base_color: RED.into(),
+                ..Default::default()
+        }));
+
         command.spawn((
-            SceneRoot(human_mother_ship_model.clone()),
-            mesh_component,
+            hm_mesh_component.clone(),
+            hm_mat_component.clone(),
             Transform {
                 translation: Vec3 { x: 0.0, y: 0.0, z: -30.0},
                 rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
@@ -44,47 +49,55 @@ fn spawn_human_mothership(
             
 
         ));
-    };
 
 }
 
 fn spawn_alien_mothership (
     mut commands: Commands,
-    asset_pack: Res<AssetPack>
-){
-    if let Some(alien_mother_ship_model) = asset_pack.scene_store.get("alien_mother_ship") {
-        let mesh_component = Mesh3d(asset_pack.mesh_store.get("alien_mother_ship").cloned().unwrap());
-        commands.spawn((
-        
-            SceneRoot(alien_mother_ship_model.clone()),
-            mesh_component,
+    asset_pack: Res<AssetPack>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 
-            Transform {
-                translation: Vec3 { x: 0.0, y: 0.0, z: 30.0},
-                rotation: Quat::from_euler(EulerRot::XYZ, 0., PI, 0.),
-                ..default()
-            },
-            Name::new("Alien_Mothership".to_string()),
-            ColliderConstructor::TrimeshFromMesh,
-            RigidBody::Dynamic,
-            Races::Scourge,
-            ShipType::Mothership,
-            BattleBundle::new(ShipType::Mothership),
-            CollisionEventsEnabled
+){
+    let am_mesh_component = Mesh3d(asset_pack.mesh_store.get("alien_mother_ship").cloned().unwrap());
+    let am_mat_compoent = MeshMaterial3d(materials.add(StandardMaterial {
+        base_color: BLUE.into(),
+        ..Default::default()
+    }));
+    commands.spawn((
+    
+        am_mesh_component.clone(),
+        am_mat_compoent.clone(),
+        Transform {
+            translation: Vec3 { x: 0.0, y: 0.0, z: 30.0},
+            rotation: Quat::from_euler(EulerRot::XYZ, 0., PI, 0.),
+            ..default()
+        },
+        Name::new("Alien_Mothership".to_string()),
+        ColliderConstructor::TrimeshFromMesh,
+        RigidBody::Dynamic,
+        Races::Scourge,
+        ShipType::Mothership,
+        BattleBundle::new(ShipType::Mothership),
+        CollisionEventsEnabled
         
         ));
-    };
 }
 fn spawn_human_carrier (
     mut commands: Commands,
-    asset_pack: Res<AssetPack>
+    asset_pack: Res<AssetPack>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+
 ){
-    if let Some(human_carrier_model) = asset_pack.scene_store.get("human_carrier") {
-        let mesh_component = Mesh3d(asset_pack.mesh_store.get("human_carrier").cloned().unwrap());
+        let hc_mesh_component = Mesh3d(asset_pack.mesh_store.get("human_carrier").cloned().unwrap());
+        let hc_mat_component = MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: RED.into(),
+            ..Default::default()
+        }));
         for n in 0..4 {
             commands.spawn((
-                SceneRoot(human_carrier_model.clone()),
-                mesh_component.clone(),
+                // SceneRoot(human_carrier_model.clone()),
+                hc_mesh_component.clone(),
+                hc_mat_component.clone(),
                 Transform {
                     translation: Vec3 { x: (10. * f32::sin( PI / 2. * n as f32)), y: (10. * f32::cos( PI / 2. * n as f32)), z: -20.},
                     rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
@@ -102,16 +115,25 @@ fn spawn_human_carrier (
 
             ));
         }
-    };
 }
 
-fn spawn_alien_carrier(mut command: Commands, asset_pack: Res<AssetPack>) {
-    if let Some(alien_carrier_model) = asset_pack.scene_store.get("alien_carrier") {
-        let mesh_component = Mesh3d(asset_pack.mesh_store.get("alien_carrier").cloned().unwrap());
+fn spawn_alien_carrier(
+    mut command: Commands, 
+    asset_pack: Res<AssetPack>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+
+        let ac_mesh_component = Mesh3d(asset_pack.mesh_store.get("alien_carrier").cloned().unwrap());
+        let ac_mat_component = MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: BLUE.into(),
+            ..Default::default()
+        }));
         for n in 0..4 {
             command.spawn((
-                SceneRoot(alien_carrier_model.clone()),
-                mesh_component.clone(),
+                // SceneRoot(alien_carrier_model.clone()),
+
+                ac_mesh_component.clone(),
+                ac_mat_component.clone(),
                 Transform {
                     translation: Vec3 { x: (10. * f32::sin(PI / 2. * n as f32)), y: (10. * f32::cos(PI / 2. * n as f32)), z: 20.},
                     rotation: Quat::from_euler(EulerRot::XYZ, 0., PI, 0.),
@@ -131,15 +153,23 @@ fn spawn_alien_carrier(mut command: Commands, asset_pack: Res<AssetPack>) {
 
             ));
         }
-    }
 }
 
-fn spawn_auto_pilot(mut command: Commands, asset_pack: Res<AssetPack>) {
-    if let Some(human_auto_pilot_model) = asset_pack.scene_store.get("human_auto_pilot") {
-        let mesh_compoent = Mesh3d(asset_pack.mesh_store.get("human_auto_pilot").cloned().unwrap());
+fn spawn_auto_pilot(
+    mut command: Commands, 
+    asset_pack: Res<AssetPack>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+
+) {
+        let ha_mesh_compoent = Mesh3d(asset_pack.mesh_store.get("human_auto_pilot").cloned().unwrap());
+        let ha_mat_component = MeshMaterial3d(materials.add(StandardMaterial {
+                base_color: RED.into(),
+                ..Default::default()
+            }));
         command.spawn((
-            SceneRoot(human_auto_pilot_model.clone()),
-            mesh_compoent,
+            // SceneRoot(human_auto_pilot_model.clone()),
+            ha_mesh_compoent.clone(),
+            ha_mat_component.clone(),
             Transform {
                 translation: Vec3 { x: 0.0, y: 0.0, z: -20.0},
                 rotation: Quat::from_euler(EulerRot::XYZ, 0., 0., 0.),
@@ -155,13 +185,16 @@ fn spawn_auto_pilot(mut command: Commands, asset_pack: Res<AssetPack>) {
             CollisionEventsEnabled
 
         ));
-    };
 
-    if let Some(alien_auto_pilot_model) = asset_pack.scene_store.get("alien_auto_pilot") {
-        let mesh_coponent = Mesh3d(asset_pack.mesh_store.get("alien_auto_pilot").cloned().unwrap());
+        let aa_mesh_coponent = Mesh3d(asset_pack.mesh_store.get("alien_auto_pilot").cloned().unwrap());
+        let aa_mat_component = MeshMaterial3d(materials.add(StandardMaterial {
+                base_color: BLUE.into(),
+                ..Default::default()
+        }));
         command.spawn((
-            SceneRoot(alien_auto_pilot_model.clone()),
-            mesh_coponent,
+            // SceneRoot(alien_auto_pilot_model.clone()),
+            aa_mesh_coponent.clone(),
+            aa_mat_component.clone(),
             Transform {
                 translation: Vec3 { x: 0.0, y: 0.0, z: 20.0},
                 rotation: Quat::from_euler(EulerRot::XYZ, 0., PI, 0.),
@@ -176,7 +209,6 @@ fn spawn_auto_pilot(mut command: Commands, asset_pack: Res<AssetPack>) {
             ColliderConstructor::TrimeshFromMesh,
             CollisionEventsEnabled
         ));
-    }
 }
 
 fn update_mobility_by_aiming(
@@ -232,20 +264,4 @@ fn despawn_no_health_units(
             commands.entity(entity).despawn();
         }
     }
-}
-
-fn collision_observer_handle(
-    trigger: Trigger<OnCollisionStart>,
-    mut health_query: Query<&mut Health>,
-    attack_query: Query<&Attack>,
-) {
-    let first_ent = trigger.target();
-    let other_entity = trigger.collider;
-
-    if let (Ok(mut first_health), Ok(other_attack)) = (health_query.get_mut(first_ent), attack_query.get(other_entity)) {
-        first_health.take_damage(other_attack.get_attack_power());
-    }
-    // if let (Ok(mut other_health), Ok(first_attack)) = (health_query.get_mut(other_entity), attack_query.get(first_ent)) {
-    //     other_health.take_damage(first_attack.get_attack_power());
-    // }
 }
