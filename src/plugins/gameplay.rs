@@ -10,11 +10,11 @@ impl Plugin for GamePlayPlugin {
 
             .configure_sets(
                 Update, (
+                    InGameSet::EntityUpdates,
+                    InGameSet::CollisionDetection,
                     InGameSet::DespawnEntites,
                     // Defered
                     InGameSet::UserInput,
-                    InGameSet::EntityUpdates,
-                    InGameSet::CollisionDetection
                 ).chain()
             )
             .add_systems(Update, 
