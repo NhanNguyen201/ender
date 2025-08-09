@@ -6,7 +6,7 @@ use crate::unit::{Attack, AttackExt, Health, HealthExt};
 
 #[derive(SystemParam)]
 struct CustomCollisionHooks<'w, 's> {
-    interaction_health_query: Query<'w, 's, &'static Health>,
+    _interaction_health_query: Query<'w, 's, &'static Health>,
 }
 
 impl CollisionHooks for CustomCollisionHooks<'_, '_> {
@@ -24,16 +24,16 @@ pub struct PhysicPlugin;
 impl Plugin for PhysicPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugins(PhysicsPlugins::default().with_collision_hooks::<CustomCollisionHooks>().set(PhysicsInterpolationPlugin::interpolate_all()))
+            .add_plugins(PhysicsPlugins::default().with_collision_hooks::<CustomCollisionHooks>().set(PhysicsInterpolationPlugin::extrapolate_all()))
             .insert_resource(Gravity::ZERO)
-            .insert_gizmo_config(
-                PhysicsGizmos {
-                    aabb_color: Some(Color::LinearRgba(LinearRgba{red: 0.1,green: 0.1, blue: 0.9, alpha: 1.0})),
-                    collider_color: Some(Color::WHITE),
-                    ..default()
-                },
-                GizmoConfig::default(),
-            )
+            // .insert_gizmo_config(
+            //     PhysicsGizmos {
+            //         aabb_color: Some(Color::LinearRgba(LinearRgba{red: 0.1,green: 0.1, blue: 0.9, alpha: 1.0})),
+            //         collider_color: Some(Color::WHITE),
+            //         ..default()
+            //     },
+            //     GizmoConfig::default(),
+            // )
             .add_observer(collision_observer_handle);
             
     }
