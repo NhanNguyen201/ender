@@ -7,6 +7,7 @@ pub use resource::*;
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Hash, States, Reflect)]
 pub enum GameState {
     #[default]
+    LoadingAssets,
     StartupScreen,
     Menu,
     Playing,
