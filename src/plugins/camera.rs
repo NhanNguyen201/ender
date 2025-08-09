@@ -45,7 +45,7 @@ impl Plugin for OrbitCameraPlugin {
              .insert_resource(DirectionalLightShadowMap { size: 4096 })
             .add_systems(PreStartup, spawn_camera.before(EguiStartupSet::InitContexts))
             .add_systems(OnExit(GameState::StartupScreen), spawn_lighs)
-            .add_systems(Update, orbit_control.run_if(in_state(GameState::Playing)).in_set(InGameSet::UserInput));
+            .add_systems(FixedUpdate, orbit_control.run_if(in_state(GameState::Playing)).in_set(InGameSet::UserInput));
           
     }
 }
@@ -87,20 +87,20 @@ fn spawn_lighs(mut commands: Commands) {
     //         ..default()
     //    }
     // ));
-    // commands.spawn((
-    //    SpotLight {
-    //         intensity: 5_000.0,
-    //         ..default()
-    //    },
-    //    Transform {
-    //         translation: Vec3 { x: 0., y: 10., z: 10. },
-    //         ..default()
-    //    }
-    // ));
+    commands.spawn((
+       SpotLight {
+            intensity: 5_000.0,
+            ..default()
+       },
+       Transform {
+            translation: Vec3 { x: 0., y: 10., z: 10. },
+            ..default()
+       }
+    ));
     commands.spawn((
         DirectionalLight {
             shadows_enabled: true,
-            illuminance: light_consts::lux::OVERCAST_DAY,
+            illuminance: 2000.0,
             ..default()
         },
         Transform {
@@ -112,7 +112,8 @@ fn spawn_lighs(mut commands: Commands) {
      commands.spawn((
         DirectionalLight {
             shadows_enabled: true,
-            illuminance: light_consts::lux::OVERCAST_DAY,
+            illuminance: 2000.0,
+
             ..default()
         },
         Transform {

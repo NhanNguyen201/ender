@@ -33,12 +33,12 @@ impl Plugin for AppPlugin {
                 })
                 .disable::<PipelinedRenderingPlugin>(),
         )
-        .add_plugins(PhysicPlugin)
         .init_state::<GameState>()
         .init_resource::<PlayerRole>()
+        .add_plugins(AssetLoaderPlugin)
+        .add_plugins(PhysicPlugin)
         
         .add_plugins(UiPlugin)
-        .add_plugins(AssetLoaderPlugin)
 
         .add_plugins(ScreenModePlugin)
         .add_plugins(GamePlayPlugin)
